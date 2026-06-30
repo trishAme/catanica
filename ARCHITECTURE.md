@@ -138,13 +138,10 @@ Test coverage includes plant action rules, cat eye generation, room plant pools,
 
 ## 7. Deployment Notes
 
-The current MVP is local-first.
+The project now includes a GitLab Pages pipeline in .gitlab-ci.yml. It is designed for a project-specific personal runner tagged catanica-local, so challenge builds do not use shared product runners.
 
-Recommended GitLab Pages / GitDocs next step:
+The deploy job builds the Vite app and publishes dist/ through GitLab Pages. Vite is configured with base: "./" so generated CSS/JS asset URLs work when the site is hosted from a project subpath. Public game assets are referenced with relative paths for the same reason.
 
-1. Build with npm run build.
-2. Publish Vite dist/ as a static site.
-3. Add a README playable link.
-4. Store any credentials only in GitLab CI/CD variables, never in the repository.
+The CI pipeline runs npm run test and npm run build. The full npm run check command remains the local verification path because visual smoke tests require a Chrome/Chromium binary.
 
-For Vite under GitLab Pages, the final base path may need to be configured depending on repository/project URL.
+After the first successful default-branch pipeline, the resulting GitLab Pages URL should be added to README.md as the playable demo link.

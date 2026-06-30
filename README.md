@@ -146,6 +146,14 @@ Current verification includes:
 - TypeScript production build;
 - headless Chrome screenshots for the start screen and all six rooms.
 
+## GitLab Pages Deployment
+
+The repository includes a GitLab Pages pipeline in .gitlab-ci.yml. It expects a project runner tagged catanica-local. If your runner uses another tag, update the default tags block in .gitlab-ci.yml before pushing.
+
+The pipeline runs unit tests and a production build, then publishes the Vite dist/ directory with GitLab Pages. After the first successful default-branch pipeline, copy the Pages URL from GitLab into this README as the playable demo link.
+
+Note: npm run check is intentionally kept as a local verification command because the visual smoke step needs Chrome. The CI pipeline uses npm run test and npm run build so it can run in a simple node:20 container.
+
 ## Repository Documents
 
 - [SPEC.md](SPEC.md) - game rules, scope, requirements, and acceptance criteria.

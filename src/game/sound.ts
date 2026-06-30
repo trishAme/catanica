@@ -6,7 +6,7 @@ let musicStep = 0;
 let defeatAudio: HTMLAudioElement | undefined;
 let defeatStopTimer: number | undefined;
 
-const DEFEAT_AUDIO_URL = "/assets/nononono-cat.mp3";
+const DEFEAT_AUDIO_URL = "assets/nononono-cat.mp3";
 export const DEFEAT_AUDIO_VOLUME = 0.32;
 
 type MusicTheme = {
