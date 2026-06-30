@@ -1,0 +1,25 @@
+{
+  "name": "nine-purrs-to-bed",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "visual:smoke": "node scripts/visual-smoke.mjs",
+    "check": "npm run test && npm run build && npm run visual:smoke",
+    "generate:assets": "node scripts/generate-pixel-assets.mjs"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.1",
+    "pngjs": "^7.0.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4"
+  }
+}
