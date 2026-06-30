@@ -7,9 +7,16 @@ import { PNG } from "pngjs";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const port = 5173;
-const url = "http://127.0.0.1:" + port + "/?smoke=game";
-const outputPath = resolve(rootDir, "artifacts", "visual-smoke-game.png");
+const baseUrl = "http://127.0.0.1:" + port + "/";
+const artifactsDir = resolve(rootDir, "artifacts");
 const chromeBin = process.env.CHROME_BIN ?? "/usr/bin/google-chrome";
+const captures = [
+  { name: "start", url: baseUrl },
+  ...Array.from({ length: 6 }, (_, level) => ({
+    name: "level-" + level,
+    url: baseUrl + "?smoke=game&level=" + level + "&seed=" + (20260630 + level)
+  }))
+];
 
 function wait(ms) {
   return new Promise((resolveWait) => {
@@ -19,7 +26,7 @@ function wait(ms) {
 
 async function isServerReady() {
   try {
-    const response = await fetch(url, { method: "HEAD" });
+    const response = await fetch(baseUrl, { method: "HEAD" });
     return response.ok;
   } catch {
     return false;
@@ -35,7 +42,7 @@ async function waitForServer() {
     await wait(250);
   }
 
-  throw new Error(`Timed out waiting for ${url}`);
+  throw new Error(`Timed out waiting for ${baseUrl}`);
 }
 
 function spawnVite() {
@@ -51,16 +58,17 @@ function spawnVite() {
   );
 }
 
-function runChrome() {
+function runChrome(capture) {
   if (!existsSync(chromeBin)) {
     throw new Error(
       `Chrome binary not found at ${chromeBin}. Set CHROME_BIN to a headless-capable Chrome/Chromium binary.`
     );
   }
 
-  mkdirSync(dirname(outputPath), { recursive: true });
+  mkdirSync(artifactsDir, { recursive: true });
 
   const profileDir = mkdtempSync(resolve(tmpdir(), "nine-purrs-chrome-"));
+  const outputPath = resolve(artifactsDir, "visual-smoke-" + capture.name + ".png");
   const args = [
     "--headless=new",
     "--disable-gpu",
@@ -71,7 +79,7 @@ function runChrome() {
     "--window-size=1152,648",
     "--virtual-time-budget=2500",
     `--screenshot=${outputPath}`,
-    url
+    capture.url
   ];
 
   return new Promise((resolveRun, rejectRun) => {
@@ -90,16 +98,17 @@ function runChrome() {
       rmSync(profileDir, { recursive: true, force: true });
 
       if (code === 0) {
-        resolveRun();
+        resolveRun(outputPath);
         return;
       }
 
-      rejectRun(new Error(`Headless Chrome exited with ${code}.\n${stderr}`));
+      rejectRun(new Error(`Headless Chrome exited with ${code}.
+${stderr}`));
     });
   });
 }
 
-function assertScreenshotLooksRendered() {
+function assertScreenshotLooksRendered(outputPath) {
   if (!existsSync(outputPath)) {
     throw new Error(`Screenshot was not created: ${outputPath}`);
   }
@@ -131,8 +140,7 @@ function assertScreenshotLooksRendered() {
     throw new Error(`Screenshot looks blank or under-rendered: ${colors.size} sampled colors`);
   }
 
-  console.log(`Visual smoke passed: ${outputPath}`);
-  console.log(`Sampled colors: ${colors.size}`);
+  return colors.size;
 }
 
 let server;
@@ -143,8 +151,13 @@ try {
   }
 
   await waitForServer();
-  await runChrome();
-  assertScreenshotLooksRendered();
+
+  for (const capture of captures) {
+    const outputPath = await runChrome(capture);
+    const colors = assertScreenshotLooksRendered(outputPath);
+    console.log(`Visual smoke passed: ${outputPath}`);
+    console.log(`Sampled colors: ${colors}`);
+  }
 } finally {
   if (server) {
     server.kill("SIGTERM");

@@ -7,6 +7,7 @@ let defeatAudio: HTMLAudioElement | undefined;
 let defeatStopTimer: number | undefined;
 
 const DEFEAT_AUDIO_URL = "/assets/nononono-cat.mp3";
+export const DEFEAT_AUDIO_VOLUME = 0.32;
 
 type MusicTheme = {
   notes: number[];
@@ -61,14 +62,19 @@ const MUSIC_THEMES: Record<string, MusicTheme> = {
     bassGain: 0.008
   },
   "grandma-corner": {
-    notes: [196, 247, 294, 330, 294, 247, 220, 0, 175, 220, 247, 294, 247, 220, 196, 0],
-    interval: 285,
+    notes: [262, 330, 392, 440, 392, 330, 294, 0, 247, 294, 330, 392, 330, 294, 262, 0],
+    interval: 315,
     lead: "triangle",
     bass: "sine",
-    gain: 0.013,
-    bassGain: 0.009
+    gain: 0.022,
+    bassGain: 0.013,
+    duration: 0.18
   }
 };
+
+export function getMusicThemeIds(): string[] {
+  return Object.keys(MUSIC_THEMES);
+}
 
 let musicThemeId = "window-bed";
 
@@ -291,7 +297,7 @@ export function playDefeatCat(): void {
 
   stopDefeatCat();
   defeatAudio ??= new Audio(DEFEAT_AUDIO_URL);
-  defeatAudio.volume = 0.32;
+  defeatAudio.volume = DEFEAT_AUDIO_VOLUME;
   defeatAudio.currentTime = 0;
 
   void defeatAudio.play().catch(() => {

@@ -99,23 +99,41 @@ function writePng(relativePath, png) {
   const filePath = resolve(OUT_DIR, relativePath); mkdirSync(dirname(filePath), { recursive: true }); writeFileSync(filePath, PNG.sync.write(png));
 }
 function drawTail(png, ox, oy, frame, palette, outline) {
-  const lift = frame === "jump" ? -12 : frame === "tail-flick" ? -13 : frame === "land" ? 3 : 0;
-  const side = frame === "walk-a" ? -1 : frame === "walk-b" ? 1 : frame === "tail-flick" ? -1 : 0;
-  const tipX = frame === "tail-flick" ? -8 : side * 7;
-  const midX = side * 2;
-  const tipY = frame === "tail-flick" ? -6 : 0;
+  const lift = frame === "jump" ? -11 : frame === "tail-flick" ? -12 : frame === "land" ? 3 : 0;
+  const wave = frame === "walk-a" ? -2 : frame === "walk-b" ? 2 : frame === "tail-flick" ? -3 : 0;
+  const tipCurl = frame === "walk-a" ? 4 : frame === "walk-b" ? -4 : frame === "tail-flick" ? -5 : 0;
+  const tipBob = frame === "walk-a" ? 2 : frame === "walk-b" ? -2 : frame === "tail-flick" ? -1 : 0;
   const points = [
-    [ox + 34, oy + 50 + lift],
-    [ox + 24, oy + 43 + lift],
-    [ox + 19 + midX, oy + 32 + lift],
-    [ox + 25 + tipX, oy + 23 + lift + tipY],
-    [ox + 34 + Math.round(tipX * 0.45), oy + 26 + lift + tipY]
+    [ox + 35, oy + 51 + lift],
+    [ox + 30 + wave, oy + 44 + lift],
+    [ox + 25 - wave, oy + 34 + lift],
+    [ox + 22 - wave, oy + 24 + lift],
+    [ox + 18 + Math.round(wave * 0.5), oy + 17 + lift],
+    [ox + 12 - wave + Math.round(tipCurl * 0.35), oy + 16 + lift + Math.round(tipBob * 0.35)],
+    [ox + 8 - wave + tipCurl, oy + 20 + lift + tipBob]
   ];
-  for (let i = 0; i < points.length - 1; i += 1) line(png, points[i][0], points[i][1], points[i + 1][0], points[i + 1][1], outline, 8);
-  for (let i = 0; i < points.length - 1; i += 1) line(png, points[i][0], points[i][1], points[i + 1][0], points[i + 1][1], palette.body, 5);
-  ellipse(png, points[4][0], points[4][1], 4, 4, outline);
-  ellipse(png, points[4][0], points[4][1], 3, 3, palette.body);
-  line(png, points[2][0] + 2, points[2][1] - 1, points[4][0] - 2, points[4][1] - 1, palette.light, 2, 185);
+
+  for (let i = 0; i < points.length - 1; i += 1) line(png, points[i][0], points[i][1], points[i + 1][0], points[i + 1][1], outline, 9);
+  for (let i = 0; i < points.length - 1; i += 1) line(png, points[i][0], points[i][1], points[i + 1][0], points[i + 1][1], palette.body, 6);
+  ellipse(png, points[6][0], points[6][1], 4, 4, palette.body);
+
+  if (palette.stripe) {
+    const bands = [
+      { center: points[1], before: points[0], after: points[2], half: 4 },
+      { center: points[2], before: points[1], after: points[3], half: 4 },
+      { center: points[3], before: points[2], after: points[4], half: 4 },
+      { center: points[4], before: points[3], after: points[5], half: 3 },
+      { center: points[5], before: points[4], after: points[6], half: 3 }
+    ];
+    bands.forEach(({ center, before, after, half }) => {
+      const dx = after[0] - before[0];
+      const dy = after[1] - before[1];
+      const length = Math.hypot(dx, dy) || 1;
+      const nx = -dy / length;
+      const ny = dx / length;
+      line(png, center[0] - nx * half, center[1] - ny * half, center[0] + nx * half, center[1] + ny * half, palette.stripe, 2, 215);
+    });
+  }
 }
 function drawLegs(png, ox, bodyY, frame, palette, outline) {
   const walkingA = frame === "walk-a"; const walkingB = frame === "walk-b"; const jump = frame === "jump"; const land = frame === "land";
@@ -137,16 +155,17 @@ function drawStandingCatFrame(png, variant, frame, frameIndex) {
   const ox = frameIndex * CAT_FRAME_WIDTH; const oy = 0; const palette = CAT_PALETTES[variant.coat]; const outline = 0x1f2635;
   const lift = frame === "jump" ? -9 : frame === "land" ? 4 : frame === "walk-a" ? -1 : frame === "walk-b" ? 1 : 0; const bodyY = oy + 42 + lift; const headY = oy + 25 + lift;
   const eyeLeft = variant.eyeColor === "odd" ? EYE_COLORS.blue : EYE_COLORS[variant.eyeColor]; const eyeRight = variant.eyeColor === "odd" ? EYE_COLORS.green : EYE_COLORS[variant.eyeColor];
-  ellipse(png, ox + 62, oy + 76, 39, 6, 0x111827, 96); drawTail(png, ox, oy, frame, palette, outline); drawLegs(png, ox, bodyY, frame, palette, outline);
-  rect(png, ox + 31, bodyY + 4, 52, 26, outline); rect(png, ox + 36, bodyY, 42, 5, outline); rect(png, ox + 35, bodyY + 7, 45, 20, palette.body);
-  rect(png, ox + 39, bodyY + 3, 35, 5, palette.mid); rect(png, ox + 42, bodyY + 8, 29, 6, mix(palette.body, palette.light, 0.25)); rect(png, ox + 37, bodyY + 22, 40, 4, palette.dark, 190);
-  rect(png, ox + 44, bodyY + 10, 9, 3, palette.light, 180); rect(png, ox + 57, bodyY + 13, 7, 3, palette.light, 125);
-  poly(png, [[ox + 76, headY + 6], [ox + 81, headY - 7], [ox + 88, headY + 7]], outline); poly(png, [[ox + 94, headY + 6], [ox + 101, headY - 7], [ox + 105, headY + 8]], outline);
-  ellipse(png, ox + 91, headY + 20, 19, 16, outline); rect(png, ox + 75, headY + 9, 32, 17, outline); rect(png, ox + 81, headY + 31, 20, 3, outline);
-  ellipse(png, ox + 91, headY + 20, 15, 13, palette.body); rect(png, ox + 79, headY + 10, 26, 16, palette.body); rect(png, ox + 82, headY + 29, 18, 3, palette.body);
-  poly(png, [[ox + 80, headY + 5], [ox + 83, headY - 2], [ox + 87, headY + 7]], palette.body); poly(png, [[ox + 96, headY + 6], [ox + 100, headY - 2], [ox + 102, headY + 8]], palette.body);
-  poly(png, [[ox + 82, headY + 4], [ox + 84, headY], [ox + 86, headY + 6]], 0xf4b0a8, 220); poly(png, [[ox + 97, headY + 5], [ox + 100, headY], [ox + 101, headY + 7]], 0xf4b0a8, 220);
-  rect(png, ox + 80, headY + 9, 14, 5, palette.mid); rect(png, ox + 81, headY + 11, 10, 3, palette.light, 130);
+  ellipse(png, ox + 62, oy + 76, 38, 6, 0x111827, 86); drawTail(png, ox, oy, frame, palette, outline); drawLegs(png, ox, bodyY, frame, palette, outline);
+  rect(png, ox + 31, bodyY + 6, 50, 22, outline); rect(png, ox + 36, bodyY + 1, 40, 7, outline); ellipse(png, ox + 37, bodyY + 17, 7, 12, outline); ellipse(png, ox + 77, bodyY + 17, 7, 12, outline);
+  rect(png, ox + 35, bodyY + 8, 42, 17, palette.body); rect(png, ox + 39, bodyY + 4, 33, 6, palette.mid); ellipse(png, ox + 38, bodyY + 17, 4, 9, palette.body); ellipse(png, ox + 76, bodyY + 17, 4, 9, palette.body);
+  rect(png, ox + 42, bodyY + 9, 27, 5, mix(palette.body, palette.light, 0.24)); rect(png, ox + 37, bodyY + 22, 38, 4, palette.dark, 165);
+  rect(png, ox + 43, bodyY + 11, 9, 3, palette.light, 165); rect(png, ox + 58, bodyY + 13, 6, 3, palette.light, 115);
+  poly(png, [[ox + 73, headY + 8], [ox + 80, headY - 10], [ox + 91, headY + 9]], outline); poly(png, [[ox + 94, headY + 9], [ox + 103, headY - 10], [ox + 109, headY + 10]], outline);
+  rect(png, ox + 75, headY + 8, 34, 25, outline); rect(png, ox + 79, headY + 5, 26, 5, outline);
+  rect(png, ox + 79, headY + 10, 28, 21, palette.body); rect(png, ox + 82, headY + 7, 20, 4, palette.body); rect(png, ox + 84, headY + 31, 17, 2, palette.body);
+  poly(png, [[ox + 78, headY + 7], [ox + 82, headY - 3], [ox + 89, headY + 9]], palette.body); poly(png, [[ox + 97, headY + 8], [ox + 101, headY - 3], [ox + 105, headY + 10]], palette.body);
+  poly(png, [[ox + 80, headY + 5], [ox + 83, headY - 3], [ox + 88, headY + 8]], 0xf4b0a8, 220); poly(png, [[ox + 99, headY + 6], [ox + 101, headY - 3], [ox + 104, headY + 9]], 0xf4b0a8, 220);
+  rect(png, ox + 80, headY + 10, 13, 4, palette.mid); rect(png, ox + 81, headY + 12, 9, 2, palette.light, 125);
   if (palette.stripe) {
     [45, 55, 66].forEach((x, index) => line(png, ox + x, bodyY + 4, ox + x - 2, bodyY + 18, palette.stripe, 2, 220 - index * 25));
     line(png, ox + 82, headY + 8, ox + 79, headY + 15, palette.stripe, 2); line(png, ox + 91, headY + 7, ox + 91, headY + 15, palette.stripe, 2); line(png, ox + 100, headY + 8, ox + 103, headY + 15, palette.stripe, 2);
@@ -163,7 +182,7 @@ function drawStandingCatFrame(png, variant, frame, frameIndex) {
   put(png, ox + 85, headY + 18, 0xffffff); put(png, ox + 98, headY + 18, 0xffffff);
   if (frame === "suspicious") { rect(png, ox + 82, headY + 15, 8, 2, outline); rect(png, ox + 95, headY + 15, 8, 2, outline); }
   if (angry) { line(png, ox + 82, headY + 15, ox + 90, headY + 13, outline, 2); line(png, ox + 96, headY + 13, ox + 104, headY + 15, outline, 2); }
-  ellipse(png, ox + 88, headY + 26, 6, 5, 0xf9e8c8, 245); ellipse(png, ox + 96, headY + 26, 6, 5, 0xf9e8c8, 245); ellipse(png, ox + 92, headY + 29, 8, 4, 0xf9e8c8, 245);
+  rect(png, ox + 85, headY + 25, 14, 5, 0xf9e8c8, 245); rect(png, ox + 88, headY + 23, 8, 4, 0xf9e8c8, 245); rect(png, ox + 87, headY + 30, 11, 2, 0xf9e8c8, 235);
   rect(png, ox + 90, headY + 24, 5, 3, 0xf49aa8); rect(png, ox + 92, headY + 27, 2, 3, outline);
   line(png, ox + 88, headY + 30, ox + 83, headY + 29, outline, 1, 220); line(png, ox + 96, headY + 30, ox + 102, headY + 29, outline, 1, 220);
   line(png, ox + 80, headY + 25, ox + 68, headY + 22, 0xf9e8c8, 1, 190); line(png, ox + 101, headY + 25, ox + 112, headY + 22, 0xf9e8c8, 1, 190); line(png, ox + 80, headY + 29, ox + 68, headY + 31, 0xf9e8c8, 1, 190); line(png, ox + 101, headY + 29, ox + 112, headY + 31, 0xf9e8c8, 1, 190);

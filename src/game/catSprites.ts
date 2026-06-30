@@ -117,21 +117,29 @@ function drawStandingCat(
   const stepB = frame === "walk-b";
 
   graphics.fillStyle(outline);
-  graphics.fillRect(offsetX + 10, bodyY - 1, 31, 16);
-  graphics.fillRect(offsetX + 34, headY - 1, 19, 19);
-  graphics.fillRect(offsetX + 37, headY - 7, 6, 9);
-  graphics.fillRect(offsetX + 47, headY - 7, 6, 9);
+  graphics.fillRect(offsetX + 10, bodyY, 31, 15);
+  graphics.fillRect(offsetX + 13, bodyY - 2, 24, 4);
+  graphics.fillRect(offsetX + 34, headY - 1, 22, 21);
+  graphics.fillRect(offsetX + 36, headY - 4, 18, 5);
+  graphics.fillRect(offsetX + 35, headY - 10, 8, 12);
+  graphics.fillRect(offsetX + 48, headY - 10, 8, 12);
 
   drawTail(graphics, offsetX, offsetY, frame, outline);
   drawLegs(graphics, offsetX, offsetY, bodyY, frame, outline, true);
 
   graphics.fillStyle(palette.body);
-  graphics.fillRect(offsetX + 12, bodyY, 27, 12);
-  graphics.fillRect(offsetX + 36, headY + 1, 15, 15);
-  graphics.fillRect(offsetX + 39, headY - 5, 3, 7);
-  graphics.fillRect(offsetX + 48, headY - 5, 3, 7);
+  graphics.fillRect(offsetX + 12, bodyY + 1, 27, 11);
+  graphics.fillRect(offsetX + 15, bodyY, 21, 3);
+  graphics.fillRect(offsetX + 36, headY + 1, 18, 17);
+  graphics.fillRect(offsetX + 38, headY - 2, 14, 3);
+  graphics.fillRect(offsetX + 40, headY + 18, 10, 1);
+  graphics.fillRect(offsetX + 37, headY - 7, 5, 9);
+  graphics.fillRect(offsetX + 50, headY - 7, 5, 9);
 
   drawTail(graphics, offsetX, offsetY, frame, palette.body);
+  if (palette.stripe) {
+    drawTailStripes(graphics, offsetX, offsetY, frame, palette.stripe);
+  }
   drawLegs(graphics, offsetX, offsetY, bodyY, frame, palette.body, false);
 
   graphics.fillStyle(palette.accent);
@@ -173,8 +181,8 @@ function drawStandingCat(
   }
 
   graphics.fillStyle(0xf4b0a8);
-  graphics.fillRect(offsetX + 40, headY - 6, 2, 4);
-  graphics.fillRect(offsetX + 49, headY - 6, 2, 4);
+  graphics.fillRect(offsetX + 38, headY - 8, 4, 6);
+  graphics.fillRect(offsetX + 51, headY - 8, 4, 6);
 
   graphics.fillStyle(eye);
   graphics.fillRect(offsetX + 39, headY + 7, 2, 3);
@@ -191,8 +199,8 @@ function drawStandingCat(
   }
 
   graphics.fillStyle(cheek);
-  graphics.fillRect(offsetX + 41, headY + 11, 7, 4);
-  graphics.fillRect(offsetX + 42, headY + 15, 4, 2);
+  graphics.fillRect(offsetX + 40, headY + 12, 9, 4);
+  graphics.fillRect(offsetX + 42, headY + 16, 5, 1);
   graphics.fillStyle(frame === "angry" ? 0xff4f4f : 0x2a1d1d);
   graphics.fillRect(offsetX + 43, headY + 11, 2, 2);
   graphics.fillRect(offsetX + 41, headY + 15, 2, 1);
@@ -247,17 +255,36 @@ function drawTail(
   frame: Exclude<CatSpriteFrame, "sleep" | "loaf">,
   color: number
 ): void {
-  const lift = frame === "jump" ? -7 : frame === "tail-flick" ? -9 : frame === "land" ? 3 : 0;
-  const side = frame === "walk-a" ? -1 : frame === "walk-b" ? 1 : frame === "tail-flick" ? -1 : 0;
-  const tipX = frame === "tail-flick" ? -4 : side * 4;
-  const midX = side;
-  const tipY = frame === "tail-flick" ? -4 : 0;
+  const lift = frame === "jump" ? -7 : frame === "tail-flick" ? -8 : frame === "land" ? 3 : 0;
+  const wave = frame === "walk-a" ? -1 : frame === "walk-b" ? 1 : frame === "tail-flick" ? -2 : 0;
+  const tipCurl = frame === "walk-a" ? 2 : frame === "walk-b" ? -2 : frame === "tail-flick" ? -3 : 0;
+  const tipBob = frame === "walk-a" ? 1 : frame === "walk-b" ? -1 : frame === "tail-flick" ? -1 : 0;
 
   graphics.fillStyle(color);
-  graphics.fillRect(offsetX + 5, offsetY + 16 + lift, 7, 6);
-  graphics.fillRect(offsetX + 2, offsetY + 10 + lift, 5, 9);
-  graphics.fillRect(offsetX + 1 + midX, offsetY + 5 + lift, 8, 6);
-  graphics.fillRect(offsetX + 6 + tipX, offsetY + 3 + lift + tipY, 5, 5);
+  graphics.fillRect(offsetX + 6, offsetY + 16 + lift, 7, 6);
+  graphics.fillRect(offsetX + 3 + wave, offsetY + 10 + lift, 6, 8);
+  graphics.fillRect(offsetX + 2 - wave, offsetY + 5 + lift, 6, 8);
+  graphics.fillRect(offsetX - 1 - wave, offsetY + lift, 7, 7);
+  graphics.fillRect(offsetX - 5 - wave + tipCurl, offsetY - 1 + lift + tipBob, 8, 5);
+  graphics.fillRect(offsetX - 6 - wave + tipCurl, offsetY + lift + tipBob, 5, 3);
+}
+
+function drawTailStripes(
+  graphics: Phaser.GameObjects.Graphics,
+  offsetX: number,
+  offsetY: number,
+  frame: Exclude<CatSpriteFrame, "sleep" | "loaf">,
+  color: number
+): void {
+  const lift = frame === "jump" ? -7 : frame === "tail-flick" ? -8 : frame === "land" ? 3 : 0;
+  const wave = frame === "walk-a" ? -1 : frame === "walk-b" ? 1 : frame === "tail-flick" ? -2 : 0;
+  const tipCurl = frame === "walk-a" ? 2 : frame === "walk-b" ? -2 : frame === "tail-flick" ? -3 : 0;
+
+  graphics.fillStyle(color, 0.88);
+  graphics.fillRect(offsetX + 4 + wave, offsetY + 13 + lift, 6, 2);
+  graphics.fillRect(offsetX + 2 - wave, offsetY + 8 + lift, 6, 2);
+  graphics.fillRect(offsetX - 1 - wave, offsetY + 3 + lift, 6, 2);
+  graphics.fillRect(offsetX - 4 - wave + tipCurl, offsetY + 1 + lift, 5, 2);
 }
 
 function drawLegs(

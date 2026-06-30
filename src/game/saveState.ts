@@ -1,4 +1,5 @@
 import type { CatVariant } from "../data/cats";
+import { getLevel } from "../data/levels";
 
 const SAVE_PREFIX = "nine-purrs-save-";
 
@@ -66,5 +67,5 @@ export function getSaveSlotTitle(slot: number): string {
     return "Слот " + slot + ": пусто";
   }
 
-  return "Слот " + slot + ": комната " + (save.levelIndex + 1);
+  return "Слот " + slot + ": " + getLevel(save.levelIndex).title;
 }

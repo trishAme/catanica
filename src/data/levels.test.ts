@@ -141,9 +141,12 @@ describe("levels", () => {
     const bedroom = LEVELS.find((level) => level.id === "bedroom");
 
     expect(bedroom).toBeDefined();
-    expect(validateResolvedLevelLayout(bedroom!, [
-      { x: 330, y: 312, width: 176 }
-    ]).map((issue) => issue.code)).toContain("shelf-decor");
+    const lampShelfCodes = validateResolvedLevelLayout(bedroom!, [
+      { x: 330, y: 312, width: 176 },
+      { x: 402, y: 244, width: 182 }
+    ]).map((issue) => issue.code);
+
+    expect(lampShelfCodes).toContain("shelf-decor");
   });
 
   it("keeps bedroom shelves from crossing the bed", () => {
@@ -153,6 +156,20 @@ describe("levels", () => {
     expect(validateResolvedLevelLayout(bedroom!, [
       { x: 260, y: 244, width: 182 }
     ]).map((issue) => issue.code)).toContain("furniture-clearance");
+  });
+
+  it("treats the bedroom nightstand as a real jump step", () => {
+    const bedroom = LEVELS.find((level) => level.id === "bedroom");
+    const nightstandRoute = [
+      { x: 530, y: 244, width: 80 }
+    ];
+
+    expect(bedroom).toBeDefined();
+    expect(validateResolvedLevelLayout(bedroom!, nightstandRoute).map((issue) => issue.code)).not.toContain("shelf-unreachable");
+
+    const bedroomWithoutNightstand = { ...bedroom!, id: "bedroom-no-nightstand" };
+
+    expect(validateResolvedLevelLayout(bedroomWithoutNightstand, nightstandRoute).map((issue) => issue.code)).toContain("shelf-unreachable");
   });
 
   it("keeps the office shelves reachable from both sides of the room", () => {

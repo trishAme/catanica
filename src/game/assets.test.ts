@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CAT_COATS, CAT_EYE_PALETTES } from "../data/cats";
+import { CAT_COATS, CAT_EYE_PALETTES, CAT_PALETTES } from "../data/cats";
 import { PLANTS } from "../data/plants";
 import { CAT_FRAME_HEIGHT, CAT_FRAME_WIDTH, CAT_SPRITE_FRAMES } from "./catSprites";
 
@@ -20,6 +20,24 @@ function getPngSize(path: string): { width: number; height: number } {
   const png = PNG.sync.read(readFileSync(path));
 
   return { width: png.width, height: png.height };
+}
+
+function countNearColor(path: string, color: number, tolerance = 28): number {
+  const png = PNG.sync.read(readFileSync(path));
+  const red = (color >> 16) & 0xff;
+  const green = (color >> 8) & 0xff;
+  const blue = color & 0xff;
+  let count = 0;
+
+  for (let index = 0; index < png.data.length; index += 4) {
+    const colorDistance = Math.abs(png.data[index] - red) + Math.abs(png.data[index + 1] - green) + Math.abs(png.data[index + 2] - blue);
+
+    if (png.data[index + 3] > 0 && colorDistance <= tolerance) {
+      count += 1;
+    }
+  }
+
+  return count;
 }
 
 function getPngVisibleBounds(
@@ -63,6 +81,37 @@ describe("pixel assets", () => {
           height: CAT_FRAME_HEIGHT
         });
       });
+    });
+  });
+
+  it("keeps every cat animation frame visible", () => {
+    CAT_COATS.forEach((coat) => {
+      const eyeColor = CAT_EYE_PALETTES[coat][0];
+      const path = join(publicAssets, "cats", coat + "-" + eyeColor + ".png");
+
+      CAT_SPRITE_FRAMES.forEach((frame, index) => {
+        const bounds = getPngVisibleBounds(path, (x, _y, alpha) =>
+          alpha > 0 && x >= index * CAT_FRAME_WIDTH && x < (index + 1) * CAT_FRAME_WIDTH
+        );
+
+        expect(bounds.pixelCount, coat + " " + frame).toBeGreaterThan(80);
+      });
+    });
+  });
+
+  it("keeps tail stripes limited to striped cat coats", () => {
+    const stripedCoats = CAT_COATS.filter((coat) => CAT_PALETTES[coat].stripe);
+    const plainCoats = CAT_COATS.filter((coat) => !CAT_PALETTES[coat].stripe);
+
+    stripedCoats.forEach((coat) => {
+      const path = join(publicAssets, "cats", coat + "-" + CAT_EYE_PALETTES[coat][0] + ".png");
+      expect(countNearColor(path, CAT_PALETTES[coat].stripe!), coat).toBeGreaterThan(20);
+    });
+
+    plainCoats.forEach((coat) => {
+      const path = join(publicAssets, "cats", coat + "-" + CAT_EYE_PALETTES[coat][0] + ".png");
+      expect(CAT_PALETTES[coat].stripe).toBeUndefined();
+      expect(countNearColor(path, 0x4f3a2d), coat).toBe(0);
     });
   });
 

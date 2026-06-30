@@ -7,16 +7,22 @@ import {
 } from "../catSprites";
 import { preloadPixelAssets } from "../assets";
 import {
+  buildLevelSummaryRows,
+  getThreatColor,
+  getThreatLabel,
+  buildStatsAfterLevel,
+  cloneActionStats,
+  createEmptyActionStats,
+  type PlantActionLogEntry,
+  type PlantActionStats
+} from "../actionStats";
+import {
   createCatVariant,
   type CatVariant
 } from "../../data/cats";
 import { LEVELS, getLevel, type FurnitureSpec, type LevelConfig } from "../../data/levels";
 import { PLANTS, type Plant } from "../../data/plants";
-import { getRoomPlantPool, getWeightedRoomPlantIds } from "../../data/roomPlantPools";
-import {
-  getShelfObjectAvoidanceZones,
-  validateResolvedLevelLayout
-} from "../../data/levelValidation";
+import { createPlantPlan, generateValidatedShelfLayout, TREATS_TO_WIN } from "../../data/levelGeneration";
 import { resolvePlantAction, type PlantAction } from "../../rules/plantActions";
 import { getDiscoveredPlantIds, markPlantDiscovered } from "../plantJournal";
 import {
@@ -41,16 +47,6 @@ type PlantActor = {
   plant: Plant;
   sprite: Phaser.GameObjects.Sprite;
   active: boolean;
-};
-
-type PlantActionLogEntry = {
-  plant: Plant;
-  action: PlantAction;
-};
-
-type PlantActionStats = {
-  eaten: Record<string, number>;
-  knocked: Record<string, number>;
 };
 
 type ArcadeCollisionObject =
@@ -124,11 +120,9 @@ const WORLD_WIDTH = 768;
 const WORLD_HEIGHT = 432;
 const RENDER_SCALE = 3;
 const FLOOR_TOP = 400;
-const PURRS_TO_WIN = 5;
+const PURRS_TO_WIN = TREATS_TO_WIN;
 const SHELF_HEIGHT = 14;
-const PLANT_VISUAL_HEIGHT = 54;
 const HUD_RESERVED_BOTTOM = 88;
-const CAT_VERTICAL_CLEARANCE = 58;
 const CAT_BASE_SCALE = 0.59;
 const CAT_BODY_WIDTH = 68;
 const CAT_BODY_HEIGHT = 56;
@@ -144,30 +138,9 @@ const WINDOW_FRAME_WIDTH = 190;
 const WINDOW_FRAME_HEIGHT = 132;
 const WINDOW_INNER_WIDTH = 168;
 const WINDOW_INNER_HEIGHT = 110;
-const WINDOW_CLEARANCE = {
-  left: WINDOW_X - WINDOW_FRAME_WIDTH / 2 - 20,
-  right: WINDOW_X + WINDOW_FRAME_WIDTH / 2 + 20,
-  top: WINDOW_Y - WINDOW_FRAME_HEIGHT / 2 - 16,
-  bottom: WINDOW_Y + WINDOW_FRAME_HEIGHT / 2 + 16
-};
 const WINDOW_SILL_TOP = WINDOW_Y + WINDOW_INNER_HEIGHT / 2 + 7;
 const WINDOW_SILL_PLATFORM_Y = WINDOW_SILL_TOP + 6;
 const WINDOW_SILL_WIDTH = 208;
-
-function createEmptyActionStats(): PlantActionStats {
-  return { eaten: {}, knocked: {} };
-}
-
-function cloneActionStats(stats: PlantActionStats): PlantActionStats {
-  return {
-    eaten: { ...stats.eaten },
-    knocked: { ...stats.knocked }
-  };
-}
-
-function addPlantStat(stats: PlantActionStats, column: keyof PlantActionStats, plant: Plant): void {
-  stats[column][plant.id] = (stats[column][plant.id] ?? 0) + 1;
-}
 
 export class GameScene extends Phaser.Scene {
   private cat: CatVariant = createCatVariant("gray");
@@ -1464,36 +1437,36 @@ export class GameScene extends Phaser.Scene {
       graphics.fillStyle(0x1f2635, 0.4);
       graphics.fillRect(deskLeft + 22, FLOOR_TOP - 17, deskRight - deskLeft - 50, 8);
       graphics.fillStyle(0x1f2635, 1);
-      graphics.fillRect(laptopX - 45, deskTop - 44, 90, 38);
+      graphics.fillRect(laptopX - 38, deskTop - 44, 76, 38);
       graphics.fillStyle(0x24354f, 1);
-      graphics.fillRect(laptopX - 39, deskTop - 39, 78, 29);
+      graphics.fillRect(laptopX - 33, deskTop - 39, 66, 29);
       graphics.fillStyle(0x15a6a3, 0.92);
-      graphics.fillRect(laptopX - 34, deskTop - 34, 68, 20);
+      graphics.fillRect(laptopX - 29, deskTop - 34, 58, 20);
       graphics.fillStyle(0x8ee6ff, 0.95);
-      graphics.fillRect(laptopX - 29, deskTop - 31, 25, 3);
-      graphics.fillRect(laptopX + 10, deskTop - 24, 17, 3);
+      graphics.fillRect(laptopX - 25, deskTop - 31, 21, 3);
+      graphics.fillRect(laptopX + 8, deskTop - 24, 14, 3);
       graphics.fillStyle(0xd9fff1, 0.5);
-      graphics.fillRect(laptopX - 32, deskTop - 33, 4, 18);
-      graphics.fillRect(laptopX - 18, deskTop - 28, 34, 1);
-      graphics.fillRect(laptopX + 3, deskTop - 20, 26, 1);
+      graphics.fillRect(laptopX - 27, deskTop - 33, 3, 18);
+      graphics.fillRect(laptopX - 15, deskTop - 28, 28, 1);
+      graphics.fillRect(laptopX + 3, deskTop - 20, 22, 1);
       graphics.fillStyle(0x1f2635, 1);
-      graphics.fillRect(laptopX - 50, deskTop - 10, 100, 12);
+      graphics.fillRect(laptopX - 42, deskTop - 10, 84, 12);
       graphics.fillStyle(0x8a5c80, 1);
-      graphics.fillRect(laptopX - 44, deskTop - 13, 88, 10);
+      graphics.fillRect(laptopX - 37, deskTop - 13, 74, 10);
       graphics.fillStyle(0xf2b7df, 0.9);
-      graphics.fillRect(laptopX - 34, deskTop - 15, 68, 5);
+      graphics.fillRect(laptopX - 29, deskTop - 15, 58, 5);
       graphics.fillStyle(0xf9e8c8, 0.82);
-      graphics.fillRect(laptopX - 22, deskTop - 12, 36, 2);
+      graphics.fillRect(laptopX - 18, deskTop - 12, 30, 2);
       graphics.fillStyle(0x405674, 1);
-      graphics.fillRect(laptopX - 27, deskTop - 7, 54, 4);
+      graphics.fillRect(laptopX - 23, deskTop - 7, 46, 4);
       graphics.fillStyle(0xf9e8c8, 0.38);
       for (let keyRow = 0; keyRow < 2; keyRow += 1) {
         for (let key = 0; key < 8; key += 1) {
-          graphics.fillRect(laptopX - 34 + key * 8, deskTop - 11 + keyRow * 4, 4, 1);
+          graphics.fillRect(laptopX - 28 + key * 7, deskTop - 11 + keyRow * 4, 3, 1);
         }
       }
       graphics.fillStyle(0x1f2635, 0.58);
-      graphics.fillRect(laptopX - 8, deskTop - 8, 16, 2);
+      graphics.fillRect(laptopX - 7, deskTop - 8, 14, 2);
 
       graphics.fillStyle(0x5f4b68, 1);
       graphics.fillRect(deskRight - 58, deskTop - 17, 14, 17);
@@ -1585,10 +1558,6 @@ export class GameScene extends Phaser.Scene {
     return this.levelRandom.integerInRange(min, max);
   }
 
-  private randomItem<T>(items: readonly T[]): T {
-    return items[this.randomBetween(0, items.length - 1)];
-  }
-
   private shuffleWithLevelSeed<T>(items: readonly T[]): T[] {
     const result = [...items];
 
@@ -1635,313 +1604,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createPlantPlan(slotCount: number): string[] {
-    const roomPool = getRoomPlantPool(this.level.id);
-    const guaranteedCount = Math.min(PURRS_TO_WIN, slotCount);
-    const startOffset = this.randomBetween(0, roomPool.edible.length - 1);
-    const guaranteedEdible = Array.from({ length: guaranteedCount }, (_, index) =>
-      roomPool.edible[(startOffset + index) % roomPool.edible.length]
-    );
-    const weightedPool = getWeightedRoomPlantIds(roomPool);
-    const dangerousPool = [...roomPool.dangerous];
-    const remaining = Array.from(
-      { length: Math.max(0, slotCount - guaranteedEdible.length) },
-      (_, index) =>
-        this.randomItem(index % 5 === 0 ? dangerousPool : weightedPool)
-    );
-
-    return this.shuffleWithLevelSeed([...guaranteedEdible, ...remaining]);
+    return createPlantPlan(this.level.id, slotCount, this.levelSeed, PURRS_TO_WIN);
   }
 
   private generateValidatedShelfSpecs(): ShelfSpec[] {
-    let shelves: ShelfSpec[] = [];
-
-    for (let attempt = 0; attempt < 64; attempt += 1) {
-      shelves = this.generateShelfSpecs();
-      const issues = validateResolvedLevelLayout(this.level, shelves);
-
-      if (issues.length === 0) {
-        return shelves;
-      }
-
-      this.levelSeed += 1;
-      this.resetLevelRandom();
-    }
-
-    const fallbackShelves = this.getDeterministicShelfFallback();
-    const fallbackIssues = validateResolvedLevelLayout(this.level, fallbackShelves);
-
-    if (fallbackIssues.length === 0) {
-      return fallbackShelves;
-    }
-
-    const issues = validateResolvedLevelLayout(this.level, shelves);
-    console.warn("Level layout validator issues", this.level.id, this.levelSeed, issues, fallbackIssues);
-
-    return fallbackShelves;
-  }
-
-  private getDeterministicShelfFallback(): ShelfSpec[] {
-    const curatedFallbacks: Record<string, ShelfSpec[]> = {
-      "desk-laptop": [
-        { x: 148, y: 216, width: 132 },
-        { x: 156, y: 156, width: 132 },
-        { x: 622, y: 282, width: 132 },
-        { x: 602, y: 216, width: 132 },
-        { x: 650, y: 156, width: 132 }
-      ],
-      "cat-hammock": [
-        { x: 390, y: 310, width: 184 },
-        { x: 250, y: 244, width: 176 },
-        { x: 528, y: 244, width: 176 },
-        { x: 396, y: 176, width: 166 },
-        { x: 650, y: 176, width: 166 }
-      ]
-    };
-
-    const curated = curatedFallbacks[this.level.id];
-
-    if (curated && validateResolvedLevelLayout(this.level, curated).length === 0) {
-      return curated;
-    }
-
-    return this.ensureReachableShelves(
-      this.level.shelves.flatMap((row) =>
-        row.centers.map((center) => ({ x: center, y: row.y, width: row.width }))
-      ).filter((shelf, index, shelves) =>
-        !this.shelfOverlapsWindow(shelf) &&
-        !this.shelfOverlapsReservedUi(shelf) &&
-        !this.shelfOverlapsWallDecor(shelf) &&
-        !this.shelfOverlapsRoomObject(shelf) &&
-        !this.shelfBlocksFurnitureClearance(shelf) &&
-        !this.shelfOverlapsAnyShelf(shelf, shelves.slice(0, index))
-      )
-    );
-  }
-
-  private generateShelfSpecs(): ShelfSpec[] {
-    const shelves: ShelfSpec[] = [];
-
-    this.level.shelves.forEach((row) => {
-      row.centers.forEach((center) => {
-        const width = row.width + this.randomBetween(-24, 28);
-        const x = Phaser.Math.Clamp(
-          center + this.randomBetween(-28, 28),
-          width / 2 + 18,
-          WORLD_WIDTH - width / 2 - 18
-        );
-        const y = row.y + this.randomBetween(-3, 3);
-        const shelf = this.keepShelfClearOfWindow({ x, y, width }, shelves);
-
-        if (
-          !this.shelfOverlapsWindow(shelf) &&
-          !this.shelfOverlapsReservedUi(shelf) &&
-          !this.shelfOverlapsWallDecor(shelf) &&
-          !this.shelfOverlapsRoomObject(shelf) &&
-          !this.shelfBlocksFurnitureClearance(shelf) &&
-          !this.shelfOverlapsAnyShelf(shelf, shelves)
-        ) {
-          shelves.push(shelf);
-        }
-      });
-    });
-
-    return this.ensureReachableShelves(shelves);
-  }
-
-  private ensureReachableShelves(shelves: ShelfSpec[]): ShelfSpec[] {
-    const requiredShelvesByLevel: Record<string, ShelfSpec[]> = {
-      "desk-laptop": [
-        { x: 148, y: 216, width: 132 },
-        { x: 156, y: 156, width: 132 },
-        { x: 622, y: 282, width: 132 },
-        { x: 602, y: 216, width: 132 },
-        { x: 650, y: 156, width: 132 }
-      ],
-      "cat-hammock": [
-        { x: 390, y: 310, width: 184 },
-        { x: 250, y: 244, width: 176 },
-        { x: 528, y: 244, width: 176 },
-        { x: 396, y: 176, width: 166 },
-        { x: 650, y: 176, width: 166 }
-      ]
-    };
-    const requiredShelves = requiredShelvesByLevel[this.level.id];
-
-    if (!requiredShelves) {
-      return shelves;
-    }
-
-    requiredShelves.forEach((required) => {
-      const hasNearbyShelf = shelves.some(
-        (shelf) =>
-          Math.abs(shelf.x - required.x) <= 46 && Math.abs(shelf.y - required.y) <= 16
-      );
-
-      const canAddRequiredShelf =
-        !this.shelfOverlapsWindow(required) &&
-        !this.shelfOverlapsReservedUi(required) &&
-        !this.shelfOverlapsWallDecor(required) &&
-        !this.shelfOverlapsRoomObject(required) &&
-        !this.shelfBlocksFurnitureClearance(required) &&
-        !this.shelfOverlapsAnyShelf(required, shelves);
-
-      if (!hasNearbyShelf && canAddRequiredShelf) {
-        shelves.push(required);
-      }
-    });
-
-    return shelves;
-  }
-
-  private keepShelfClearOfWindow(shelf: ShelfSpec, existingShelves: ShelfSpec[] = []): ShelfSpec {
-    if (!this.shelfOverlapsWindow(shelf)) {
-      return shelf;
-    }
-
-    const leftCandidate = {
-      ...shelf,
-      x: Phaser.Math.Clamp(
-        WINDOW_CLEARANCE.left - shelf.width / 2 - 16,
-        shelf.width / 2 + 18,
-        WORLD_WIDTH - shelf.width / 2 - 18
-      )
-    };
-    const rightCandidate = {
-      ...shelf,
-      x: Phaser.Math.Clamp(
-        WINDOW_CLEARANCE.right + shelf.width / 2 + 16,
-        shelf.width / 2 + 18,
-        WORLD_WIDTH - shelf.width / 2 - 18
-      )
-    };
-    const candidates = [leftCandidate, rightCandidate].filter(
-      (candidate) =>
-        !this.shelfOverlapsWindow(candidate) &&
-        !this.shelfOverlapsAnyShelf(candidate, existingShelves)
-    );
-
-    return (
-      candidates.sort(
-        (left, right) => Math.abs(left.x - shelf.x) - Math.abs(right.x - shelf.x)
-      )[0] ?? shelf
-    );
-  }
-
-  private shelfOverlapsWindow(shelf: ShelfSpec): boolean {
-    const left = shelf.x - shelf.width / 2;
-    const right = shelf.x + shelf.width / 2;
-    const top = shelf.y - SHELF_HEIGHT / 2;
-    const bottom = shelf.y + SHELF_HEIGHT / 2;
-
-    return (
-      left < WINDOW_CLEARANCE.right &&
-      right > WINDOW_CLEARANCE.left &&
-      top < WINDOW_CLEARANCE.bottom &&
-      bottom > WINDOW_CLEARANCE.top
-    );
-  }
-
-  private shelfOverlapsReservedUi(shelf: ShelfSpec): boolean {
-    return this.shelfVisualIntersectsRect(shelf, {
-      left: 0,
-      right: WORLD_WIDTH,
-      top: 0,
-      bottom: HUD_RESERVED_BOTTOM
-    });
-  }
-
-  private shelfOverlapsWallDecor(shelf: ShelfSpec): boolean {
-    return this.getShelfAvoidanceZones().some((zone) =>
-      this.shelfVisualIntersectsRect(shelf, zone)
-    );
-  }
-
-  private shelfOverlapsRoomObject(shelf: ShelfSpec): boolean {
-    return getShelfObjectAvoidanceZones(this.level).some((zone) =>
-      this.shelfBodyIntersectsRect(shelf, zone)
-    );
-  }
-
-  private shelfBodyIntersectsRect(
-    shelf: ShelfSpec,
-    rect: { left: number; right: number; top: number; bottom: number }
-  ): boolean {
-    const shelfLeft = shelf.x - shelf.width / 2;
-    const shelfRight = shelf.x + shelf.width / 2;
-    const shelfTop = shelf.y - SHELF_HEIGHT / 2;
-    const shelfBottom = shelf.y + SHELF_HEIGHT / 2;
-
-    return (
-      shelfLeft < rect.right &&
-      shelfRight > rect.left &&
-      shelfTop < rect.bottom &&
-      shelfBottom > rect.top
-    );
-  }
-
-  private shelfVisualIntersectsRect(
-    shelf: ShelfSpec,
-    rect: { left: number; right: number; top: number; bottom: number }
-  ): boolean {
-    const shelfLeft = shelf.x - shelf.width / 2;
-    const shelfRight = shelf.x + shelf.width / 2;
-    const visualTop = shelf.y - SHELF_HEIGHT / 2 - PLANT_VISUAL_HEIGHT;
-    const visualBottom = shelf.y + SHELF_HEIGHT / 2;
-
-    return (
-      shelfLeft < rect.right &&
-      shelfRight > rect.left &&
-      visualTop < rect.bottom &&
-      visualBottom > rect.top
-    );
-  }
-
-  private getShelfAvoidanceZones(): Array<{ left: number; right: number; top: number; bottom: number }> {
-    const zones: Array<{ left: number; right: number; top: number; bottom: number }> = [];
-
-    zones.push(...(this.level.decor?.shelfAvoidanceZones ?? []));
-
-    return zones;
-  }
-
-  private shelfOverlapsAnyShelf(shelf: ShelfSpec, shelves: ShelfSpec[]): boolean {
-    return shelves.some((otherShelf) => this.shelvesOverlap(shelf, otherShelf));
-  }
-
-  private shelvesOverlap(leftShelf: ShelfSpec, rightShelf: ShelfSpec): boolean {
-    const verticalOverlap = Math.abs(leftShelf.y - rightShelf.y) < SHELF_HEIGHT + 12;
-    const leftA = leftShelf.x - leftShelf.width / 2;
-    const rightA = leftShelf.x + leftShelf.width / 2;
-    const leftB = rightShelf.x - rightShelf.width / 2;
-    const rightB = rightShelf.x + rightShelf.width / 2;
-    const horizontalOverlap = leftA < rightB + 24 && rightA > leftB - 24;
-
-    return verticalOverlap && horizontalOverlap;
-  }
-
-  private shelfBlocksFurnitureClearance(shelf: ShelfSpec): boolean {
-    const shelfLeft = shelf.x - shelf.width / 2;
-    const shelfRight = shelf.x + shelf.width / 2;
-    const shelfBottom = shelf.y + SHELF_HEIGHT / 2;
-
-    return this.level.furniture.some((item) => {
-      const furnitureLeft = item.x - item.width / 2;
-      const furnitureRight = item.x + item.width / 2;
-      const furnitureTop = item.kind === "bed" ? FLOOR_TOP - item.height : item.y;
-      const verticalGap = furnitureTop - shelfBottom;
-      const overlapsHorizontally =
-        shelfLeft < furnitureRight - 6 && shelfRight > furnitureLeft + 6;
-
-      if (!overlapsHorizontally) {
-        return false;
-      }
-
-      if (item.kind === "bed") {
-        return shelfBottom > furnitureTop - CAT_VERTICAL_CLEARANCE;
-      }
-
-      return verticalGap >= 0 && verticalGap < CAT_VERTICAL_CLEARANCE;
-    });
+    return generateValidatedShelfLayout(this.level, this.levelSeed);
   }
 
   private createPlantSlots(): Array<{ x: number; y: number }> {
@@ -2625,10 +2292,10 @@ export class GameScene extends Phaser.Scene {
         color: "#f9e8c8",
         fontStyle: "bold"
       }).setDepth(41);
-      const threat = this.add.text(x + 34, y + 13, this.getThreatLabel(plant), {
+      const threat = this.add.text(x + 34, y + 13, getThreatLabel(plant), {
         fontFamily: "monospace",
         fontSize: "9px",
-        color: this.getThreatColor(plant)
+        color: getThreatColor(plant)
       }).setDepth(41);
       const fact = this.add.text(x + 34, y + 25, plant.sniffDescription, {
         fontFamily: "monospace",
@@ -3360,6 +3027,18 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    if (this.level.id === "desk-laptop") {
+      const alpha = stage.beamAlpha;
+
+      this.windowLight.fillStyle(stage.beamColor, alpha * 0.28);
+      this.windowLight.fillEllipse(WINDOW_X + 36, WINDOW_Y + 74, 220, 104);
+      this.windowLight.fillStyle(stage.beamColor, alpha * 0.18);
+      this.windowLight.fillEllipse(WINDOW_X + 80, FLOOR_TOP - 48, 270, 44);
+      this.windowLight.fillStyle(0xfff1b6, alpha * 0.1);
+      this.windowLight.fillRect(WINDOW_X - 18, WINDOW_Y + 48, 124, 28);
+      return;
+    }
+
     if (this.level.id === "bedroom") {
       const rays = [
         { color: 0xf1a7cf, fromLeft: -48, fromRight: -12, toLeft: 54, toRight: 150 },
@@ -3438,10 +3117,10 @@ export class GameScene extends Phaser.Scene {
         if (lamp.kind === "floor") {
           this.floorLampLight.fillStyle(0xfff1b6, 0.14 * intensity);
           this.floorLampLight.fillEllipse(lamp.x, lamp.shadeY + 26, 72, 58);
-          this.floorLampLight.fillStyle(0xffd56f, 0.055 * intensity);
-          this.floorLampLight.fillEllipse(lamp.x + 36, lamp.shadeY + 86, 170, 170);
-          this.floorLampLight.fillStyle(0xffe6a6, 0.04 * intensity);
-          this.floorLampLight.fillTriangle(lamp.x - 22, lamp.shadeY + 38, lamp.x + 154, FLOOR_TOP - 22, lamp.x - 10, FLOOR_TOP - 12);
+          this.floorLampLight.fillStyle(0xffd56f, 0.052 * intensity);
+          this.floorLampLight.fillEllipse(lamp.x + 28, lamp.shadeY + 92, 152, 152);
+          this.floorLampLight.fillStyle(0xfff1b6, 0.032 * intensity);
+          this.floorLampLight.fillEllipse(lamp.x + 48, FLOOR_TOP - 34, 178, 58);
           this.floorLampLight.fillStyle(0x101633, 0.08 * intensity);
           this.floorLampLight.fillEllipse(lamp.x + 58, FLOOR_TOP + 3, 168, 12);
           return;
@@ -3641,103 +3320,20 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private getLevelSummaryRows(): Array<{
-    plant: Plant;
-    actionLabel: string;
-    threatLabel: string;
-    threatColor: string;
-  }> {
-    const rows = new Map<string, {
-      plant: Plant;
-      actionLabel: string;
-      threatLabel: string;
-      threatColor: string;
-    }>();
-
-    this.plantActionLog.forEach((entry) => {
-      rows.set(entry.plant.id, {
-        plant: entry.plant,
-        actionLabel: this.getActionLabel(entry.action),
-        threatLabel: this.getThreatLabel(entry.plant),
-        threatColor: this.getThreatColor(entry.plant)
-      });
-    });
-
-    this.plants
-      .filter((actor) => actor.plant.category === "dangerous")
-      .forEach((actor) => {
-        if (rows.has(actor.plant.id)) {
-          return;
-        }
-
-        rows.set(actor.plant.id, {
-          plant: actor.plant,
-          actionLabel: "в комнате",
-          threatLabel: this.getThreatLabel(actor.plant),
-          threatColor: this.getThreatColor(actor.plant)
-        });
-      });
-
-    return Array.from(rows.values());
-  }
-
-  private getActionLabel(action: PlantAction): string {
-    if (action === "eat") {
-      return "съедено";
-    }
-
-    if (action === "knock") {
-      return "сбито";
-    }
-
-    return "обнюхано";
-  }
-
-  private getThreatLabel(plant: Plant): string {
-    if (plant.category === "edible") {
-      return "полезное";
-    }
-
-    if (plant.category === "neutral") {
-      return "нейтральное";
-    }
-
-    return "опасное";
-  }
-
-  private getThreatColor(plant: Plant): string {
-    if (plant.category === "edible") {
-      return "#b7f28b";
-    }
-
-    if (plant.category === "neutral") {
-      return "#8ee6ff";
-    }
-
-    return "#ff8eb5";
+  private getLevelSummaryRows(): ReturnType<typeof buildLevelSummaryRows> {
+    return buildLevelSummaryRows(
+      this.plantActionLog,
+      this.plants.map((actor) => actor.plant)
+    );
   }
 
   private getStatsAfterCurrentLevel(): PlantActionStats {
-    const stats = cloneActionStats(this.gameStats);
-
-    this.plantActionLog.forEach((entry) => {
-      if (entry.action === "eat") {
-        addPlantStat(stats, "eaten", entry.plant);
-      } else if (entry.action === "knock") {
-        addPlantStat(stats, "knocked", entry.plant);
-      }
-    });
-
-    const knockedLampCount = this.roomLamps.filter((lamp) => lamp.knocked).length;
-    if (knockedLampCount > 0) {
-      stats.knocked.lamp = (stats.knocked.lamp ?? 0) + knockedLampCount;
-    }
-
-    if (this.tvBroken) {
-      stats.knocked.tv = (stats.knocked.tv ?? 0) + 1;
-    }
-
-    return stats;
+    return buildStatsAfterLevel(
+      this.gameStats,
+      this.plantActionLog,
+      this.roomLamps.filter((lamp) => lamp.knocked).length,
+      this.tvBroken
+    );
   }
 
   private isLastLevel(): boolean {
@@ -4109,6 +3705,10 @@ export class GameScene extends Phaser.Scene {
 
     if (item.kind === "sofa") {
       addPlatform(item.y - item.height + 22, item.x - item.width / 2 + 20, item.x + item.width / 2 - 20);
+    }
+
+    if (this.level.id === "bedroom" && item.kind === "bed") {
+      addPlatform(FLOOR_TOP - 67, 322, 374);
     }
 
     if (item.kind === "tv-stand" && !this.tvBroken) {

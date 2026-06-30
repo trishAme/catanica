@@ -39,4 +39,12 @@ describe("plantJournal", () => {
 
     expect(getDiscoveredPlantIds()).toEqual(["cat-grass", "lily"]);
   });
+
+  it("ignores malformed journal data and non-string ids", () => {
+    window.localStorage.setItem("nine-purrs-plant-journal", JSON.stringify(["rose", 42, null, "lily"]));
+    expect(getDiscoveredPlantIds()).toEqual(["rose", "lily"]);
+
+    window.localStorage.setItem("nine-purrs-plant-journal", "{broken");
+    expect(getDiscoveredPlantIds()).toEqual([]);
+  });
 });

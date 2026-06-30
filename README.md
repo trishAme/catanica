@@ -1,68 +1,165 @@
-# Catanica
+# Catanica / Котаника
 
-Cozy pixel-art educational platformer about a cat, houseplants, and the important bedtime work of collecting five cat treats.
+**Catanica** is a cozy pixel-art educational platformer about a cat, houseplants, and the important bedtime work of collecting five treats before sleep.
 
-## Run
+The player controls a cat directly: walking across shelves and furniture, sniffing plants, eating cat-friendly grass, and knocking risky pots out of reach. The game is intentionally small, warm, and demo-friendly: it is meant to show an end-to-end AI-native development workflow rather than become a production game.
 
-```bash
+> Educational disclaimer: this game is not veterinary advice. If a real cat may have eaten a harmful or questionable plant, contact a veterinarian or animal poison control.
+
+## Project Overview
+
+This project was built for an internal AI-native development challenge. The goal was to practice working with Codex as a development partner across planning, implementation, testing, visual iteration, documentation, and delivery.
+
+The current version includes:
+
+- six playable rooms: kitchen, remote office, living room, bedroom, greenhouse, and grandma corner;
+- six selectable cat coats with generated eye colors;
+- a curated local plant database with edible, neutral, and dangerous plant categories;
+- seed-based shelf generation with layout validation;
+- local save slots;
+- plant journal / herbarium view;
+- room-specific music, Web Audio sound effects, and a short defeat mp3 sample;
+- generated PNG pixel-art assets for cats, plants, and some decor;
+- automated unit, build, and visual smoke checks.
+
+## Game Description
+
+Each level is a room full of shelves, furniture, and houseplants. The cat needs to collect enough safe treats before bedtime.
+
+Plant actions:
+
+- **Edible / cat plant**: eat it to gain one treat.
+- **Neutral plant**: eating or knocking it does not reward the player, but the cat is fine.
+- **Dangerous plant**: knock it down to remove the hazard; eating it causes a loss.
+
+The level ends when the cat collects **5 treats** or when all plants are gone. If the cat eats a dangerous plant, the failure line appears:
+
+~~~text
+Вы прокляты Азурой за невнимательность
+~~~
+
+The cat is never shown as harmed; the loss state is dramatic and educational, not graphic.
+
+## Screenshots
+
+### Start Screen
+
+![Start screen](docs/screenshots/start-screen.png)
+
+### Kitchen
+
+![Kitchen level](docs/screenshots/kitchen.png)
+
+### Remote Office
+
+![Remote office level](docs/screenshots/office.png)
+
+### Greenhouse
+
+![Greenhouse level](docs/screenshots/greenhouse.png)
+
+## Setup Instructions
+
+Requirements:
+
+- Node.js 20+ recommended;
+- npm;
+- Google Chrome or Chromium for visual smoke tests. The script uses /usr/bin/google-chrome by default. Set CHROME_BIN if Chrome lives elsewhere.
+
+Install dependencies:
+
+~~~bash
 npm install
+~~~
+
+## Run Instructions
+
+Start the local development server:
+
+~~~bash
 npm run dev
-```
+~~~
 
-Then open the local URL printed by Vite.
+Then open the local URL printed by Vite, usually:
 
-## Test
+~~~text
+http://127.0.0.1:5173/
+~~~
 
-```bash
-npm run test
+Preview a production build locally:
+
+~~~bash
 npm run build
-npm run visual:smoke
-```
+npm run preview
+~~~
 
-`npm run visual:smoke` runs the game in a local Vite server, opens it in headless Chrome, saves a screenshot to `artifacts/visual-smoke-game.png`, and checks that the screenshot is not blank. It uses `/usr/bin/google-chrome` by default; set `CHROME_BIN` if Chrome lives elsewhere.
+Vite preview usually opens on:
 
-## How to Play
+~~~text
+http://127.0.0.1:4173/
+~~~
 
-Choose a cat coat, then explore the room as the cat.
+## Controls
 
 | Input | Action |
 | --- | --- |
-| `Left` / `Right` or `A` / `D` | Walk |
-| `W` | Jump |
-| `S` or `Down` | Drop through a shelf |
-| `F` | Sniff a nearby plant |
-| `E` | Eat a nearby plant |
-| `Q` | Knock a nearby pot off the shelf |
+| A / D or arrow keys | Walk |
+| W | Jump |
+| S or down arrow | Drop through a shelf |
+| F | Sniff nearby plant |
+| E | Eat nearby plant |
+| Q | Knock nearby object / pot |
+| J | Open herbarium |
+| L | Open save slots |
+| R | Restart / return to main menu when prompted |
+| Caps Lock | Secret giant-cat joke mode |
 
-Eat cat-grass-style plants to gain purrs. Sniff plants to see their name and a short recognition clue. Knock down plants that should not be eaten. The level ends when the cat gets 5 treats and goes to sleep, or when the cat eats a dangerous plant.
+## Test Instructions
 
-## Current Prototype Scope
+Run all unit tests:
 
-- Phaser 3 + TypeScript + Vite.
-- Start screen with gray, black, orange, white, tabby, and calico cats.
-- Eye color generated from the selected coat palette.
-- One playable room with shelves and placeholder pixel-style sprites.
-- Local curated plant data.
-- Sniff, eat, and knock actions.
-- Unit-tested plant action rules.
-- Basic purr tracker and day-to-night transition.
+~~~bash
+npm run test
+~~~
+
+Run a production build:
+
+~~~bash
+npm run build
+~~~
+
+Run visual smoke tests:
+
+~~~bash
+npm run visual:smoke
+~~~
+
+Run the full local verification suite:
+
+~~~bash
+npm run check
+~~~
+
+Current verification includes:
+
+- unit tests for plant rules, level generation, saves, journal, stats, audio cue contracts, and assets;
+- TypeScript production build;
+- headless Chrome screenshots for the start screen and all six rooms.
+
+## Repository Documents
+
+- [SPEC.md](SPEC.md) - game rules, scope, requirements, and acceptance criteria.
+- [ARCHITECTURE.md](ARCHITECTURE.md) - stack, architecture, design decisions, and AI workflow.
+- [RETROSPECTIVE.md](RETROSPECTIVE.md) - AI-native workflow lessons learned.
+- [docs/ai-tools-and-issues.md](docs/ai-tools-and-issues.md) - detailed tool and issue log captured during development.
+- [docs/roadmap.md](docs/roadmap.md) - future improvement ideas.
+- [docs/pixel-art-asset-plan.md](docs/pixel-art-asset-plan.md) - plan for replacing generated art with real sprite assets.
 
 ## Plant Data Note
 
-The game uses a small curated local plant database instead of fetching plant data at runtime. This keeps the demo deterministic and easy to run.
-
-This is an educational prototype, not veterinary advice. If a real cat may have eaten a harmful or questionable plant, contact a veterinarian or animal poison control.
+The game uses a curated local plant database instead of fetching plant data at runtime. This keeps the demo deterministic, testable, and easy to run without network access.
 
 Initial references:
 
 - [ASPCA Toxic and Non-Toxic Plant List - Cats](https://www.aspca.org/pet-care/animal-poison-control/cats-plant-list)
 - [Pet Poison Helpline - Lilies](https://www.petpoisonhelpline.com/poison/lilies/)
-
-## Design Docs
-
-- [Game Design Draft](docs/game-design.md)
-- [Technical Scope](docs/technical-scope.md)
-- [AI Tools and Technical Issues](docs/ai-tools-and-issues.md)
-- [Later Notes](docs/later-notes.md)
-- [Next Iteration Questions and Ideas](docs/next-iteration-questions.md)
-- [Pixel Art Asset Plan](docs/pixel-art-asset-plan.md)

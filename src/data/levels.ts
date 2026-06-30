@@ -186,7 +186,7 @@ export const LEVELS: readonly LevelConfig[] = [
     ],
     decor: {
       shelfAvoidanceZones: [
-        { left: 250, right: 420, top: 260, bottom: 400 }
+        { left: 250, right: 430, top: 206, bottom: 400 }
       ],
       lamps: [
         { id: "bedside-lamp", x: 347, shadeY: 294, kind: "table" }

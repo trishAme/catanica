@@ -158,8 +158,10 @@ export function validateResolvedLevelLayout(
         .filter((lower) => lower.top > upper.top && horizontalOverlap(upper, lower) > 10)
         .forEach((lower) => {
           const gap = lower.top - upper.top;
+          const furnitureFloorGap = upper.kind === "furniture" && lower.kind === "floor";
+          const furnitureStackGap = upper.kind === "furniture" && lower.kind === "furniture";
 
-          if (gap > 0 && gap < CAT_VERTICAL_CLEARANCE) {
+          if (!furnitureFloorGap && !furnitureStackGap && gap > 0 && gap < CAT_VERTICAL_CLEARANCE) {
             issues.push(createIssue(level, "cat-clearance", "Между прыгательными поверхностями не пролезает кот."));
           }
         });
@@ -316,6 +318,16 @@ function createSurfaces(level: LevelConfig, shelves: readonly ResolvedShelfSpec[
       });
     }
   });
+
+  if (level.id === "bedroom") {
+    surfaces.push({
+      id: "bedroom-nightstand",
+      top: FLOOR_TOP - 67,
+      left: 322,
+      right: 374,
+      kind: "furniture"
+    });
+  }
 
   if (level.sleepSpot.type === "laptop") {
     surfaces.push({
