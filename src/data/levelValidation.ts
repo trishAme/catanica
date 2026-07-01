@@ -339,7 +339,7 @@ function createSurfaces(level: LevelConfig, shelves: readonly ResolvedShelfSpec[
     });
   }
 
-  if (level.id !== "desk-laptop" && level.id !== "greenhouse") {
+  if (level.id !== "window-bed" && level.id !== "desk-laptop" && level.id !== "greenhouse") {
     surfaces.push({
       id: "window-sill",
       top: WINDOW_SILL_TOP,
