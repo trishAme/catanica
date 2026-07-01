@@ -46,6 +46,7 @@ describe("saveState", () => {
       purrs: 2,
       lightingStage: 2,
       seed: 123456,
+      catPosition: { x: 240, y: 312 },
       tvBroken: true,
       shelves: [{ x: 100, y: 200, width: 160 }],
       plants: [

@@ -1520,6 +1520,9 @@ export class GameScene extends Phaser.Scene {
   private createPlayer(): void {
     const key = getCatSpritesheetKey(this.cat);
     this.player = this.physics.add.sprite(82, WORLD_HEIGHT - 62, key, "idle");
+    if (this.restoredSave?.catPosition) {
+      this.player.setPosition(this.restoredSave.catPosition.x, this.restoredSave.catPosition.y);
+    }
     this.applyCatVisualScale();
     this.player.setCollideWorldBounds(true);
     this.player.setDragX(1100);
@@ -1648,7 +1651,7 @@ export class GameScene extends Phaser.Scene {
       .setDepth(5);
 
     this.purrText = this.add
-      .text(14, 14, "Лакомства: 0/" + PURRS_TO_WIN, {
+      .text(14, 14, "Лакомства: " + this.purrs + "/" + PURRS_TO_WIN, {
         fontFamily: "monospace",
         fontSize: "14px",
         color: "#f9e8c8",
@@ -2405,6 +2408,10 @@ export class GameScene extends Phaser.Scene {
       purrs: this.purrs,
       lightingStage: this.lightingStage,
       seed: this.levelSeed,
+      catPosition: {
+        x: this.player.x,
+        y: this.player.y
+      },
       tvBroken: this.tvBroken,
       shelves: this.shelfSpecs.map((shelf) => ({ ...shelf })),
       plants: this.plants.map((actor) => ({

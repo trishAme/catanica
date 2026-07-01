@@ -22,6 +22,11 @@ export type SavedLamp = {
   knocked: boolean;
 };
 
+export type SavedCatPosition = {
+  x: number;
+  y: number;
+};
+
 export type GameSaveState = {
   version: 1;
   savedAt: string;
@@ -30,6 +35,7 @@ export type GameSaveState = {
   purrs: number;
   lightingStage: number;
   seed?: number;
+  catPosition?: SavedCatPosition;
   tvBroken?: boolean;
   shelves: SavedShelf[];
   plants: SavedPlant[];
