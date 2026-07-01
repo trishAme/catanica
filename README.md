@@ -22,6 +22,10 @@ The current version includes:
 - generated PNG pixel-art assets for cats, plants, and some decor;
 - automated unit, build, and visual smoke checks.
 
+## Play Online
+
+[Play Catanica / Котаника](http://catanica-8e5033.pages.git.ringcentral.com/)
+
 ## Game Description
 
 Each level is a room full of shelves, furniture, and houseplants. The cat needs to collect enough safe treats before bedtime.
