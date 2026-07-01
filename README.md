@@ -2,7 +2,7 @@
 
 **Catanica** is a cozy pixel-art educational platformer about a cat, houseplants, and the important bedtime work of collecting five treats before sleep.
 
-The player controls a cat directly: walking across shelves and furniture, sniffing plants, eating cat-friendly grass, and knocking risky pots out of reach. The game is intentionally small, warm, and demo-friendly: it is meant to show an end-to-end AI-native development workflow rather than become a production game.
+The player controls a cat directly: walking across shelves and furniture, reading nearby plant labels, eating cat-friendly grass, and knocking risky pots out of reach. The game is intentionally small, warm, and demo-friendly: it is meant to show an end-to-end AI-native development workflow rather than become a production game.
 
 > Educational disclaimer: this game is not veterinary advice. If a real cat may have eaten a harmful or questionable plant, contact a veterinarian or animal poison control.
 
@@ -110,7 +110,6 @@ http://127.0.0.1:4173/
 | A / D or arrow keys | Walk |
 | W | Jump |
 | S or down arrow | Drop through a shelf |
-| F | Sniff nearby plant |
 | E | Eat nearby plant |
 | Q | Knock nearby object / pot |
 | J | Open herbarium |

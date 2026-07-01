@@ -25,9 +25,9 @@ Plants have one of three categories:
 | Dangerous plant | Knock | Hazard removed, no loss |
 | Dangerous plant | Eat | Loss state |
 
-### 1.4 Sniffing
+### 1.4 Plant Recognition Labels
 
-The cat can sniff a nearby plant. Sniffing shows the plant name and recognition information, but it does not reveal the safety category before the player acts.
+When the cat stands near a plant, the game shows the plant name as a contextual label. The label helps the player identify the plant, but it does not reveal the safety category before the player acts.
 
 ### 1.5 Loss State
 
@@ -68,7 +68,7 @@ The player advances to the next room after completing the current one.
 - Edible, neutral, and dangerous plants.
 - Local plant database.
 - Room-specific plant pools.
-- Sniff, eat, and knock actions.
+- Contextual plant labels, eat actions, and knock actions.
 - Treat counter.
 - Lighting progression within levels.
 - Level recap with plant model, name, action, and threat level.
@@ -112,7 +112,8 @@ The player advances to the next room after completing the current one.
 - The cat must be able to walk left and right.
 - The cat must jump.
 - The cat must drop through shelves.
-- The cat must sniff, eat, and knock nearby plants.
+- The game must show contextual plant names near the cat.
+- The cat must eat and knock nearby plants or objects.
 - The player must be able to open the herbarium.
 - The player must be able to open save slots.
 - The player must be able to restart / return to the main menu with confirmation.
