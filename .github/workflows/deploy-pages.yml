@@ -33,11 +33,8 @@ jobs:
           NPM_CONFIG_OMIT: ""
         run: npm ci --include=dev
 
-      - name: Verify local Vite install
-        run: npm ls vite
-
       - name: Build
-        run: ./node_modules/.bin/vite build
+        run: npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
