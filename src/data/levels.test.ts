@@ -68,6 +68,30 @@ describe("levels", () => {
     }
   });
 
+  it("does not use the kitchen window sill as the only bridge", () => {
+    const kitchen = LEVELS.find((level) => level.id === "window-bed");
+
+    expect(kitchen).toBeDefined();
+    const missingMiddleBridge = validateResolvedLevelLayout(kitchen!, [
+      { x: 448, y: 310, width: 132 },
+      { x: 660, y: 310, width: 132 },
+      { x: 130, y: 174, width: 170 },
+      { x: 640, y: 174, width: 170 }
+    ]).map((issue) => issue.code);
+
+    expect(missingMiddleBridge).toContain("shelf-unreachable");
+
+    const bridgedRoute = validateResolvedLevelLayout(kitchen!, [
+      { x: 448, y: 310, width: 132 },
+      { x: 250, y: 242, width: 200 },
+      { x: 520, y: 242, width: 200 },
+      { x: 130, y: 174, width: 170 },
+      { x: 640, y: 174, width: 170 }
+    ]).map((issue) => issue.code);
+
+    expect(bridgedRoute).not.toContain("shelf-unreachable");
+  });
+
   it("treats the office sofa back as a real jump step", () => {
     const office = LEVELS.find((level) => level.id === "desk-laptop");
     const officeRoute = [

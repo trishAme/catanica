@@ -103,6 +103,13 @@ function generateShelfSpecs(level: LevelConfig, seed: number): ResolvedShelfSpec
 
 function getDeterministicShelfFallback(level: LevelConfig): ResolvedShelfSpec[] {
   const curatedFallbacks: Record<string, ResolvedShelfSpec[]> = {
+    "window-bed": [
+      { x: 448, y: 310, width: 132 },
+      { x: 250, y: 242, width: 200 },
+      { x: 520, y: 242, width: 200 },
+      { x: 130, y: 174, width: 170 },
+      { x: 640, y: 174, width: 170 }
+    ],
     "desk-laptop": [
       { x: 148, y: 216, width: 132 },
       { x: 156, y: 156, width: 132 },
@@ -142,6 +149,13 @@ function getDeterministicShelfFallback(level: LevelConfig): ResolvedShelfSpec[] 
 
 function ensureReachableShelves(level: LevelConfig, shelves: ResolvedShelfSpec[]): ResolvedShelfSpec[] {
   const requiredShelvesByLevel: Record<string, ResolvedShelfSpec[]> = {
+    "window-bed": [
+      { x: 448, y: 310, width: 132 },
+      { x: 250, y: 242, width: 200 },
+      { x: 520, y: 242, width: 200 },
+      { x: 130, y: 174, width: 170 },
+      { x: 640, y: 174, width: 170 }
+    ],
     "desk-laptop": [
       { x: 148, y: 216, width: 132 },
       { x: 156, y: 156, width: 132 },
