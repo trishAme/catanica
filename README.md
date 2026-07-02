@@ -108,7 +108,7 @@ http://127.0.0.1:4173/
 | Input | Action |
 | --- | --- |
 | A / D or arrow keys | Walk |
-| W | Jump |
+| W / Space | Jump |
 | S or down arrow | Drop through a shelf |
 | E | Eat nearby plant |
 | Q | Knock nearby object / pot |

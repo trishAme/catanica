@@ -103,6 +103,7 @@ type KeyMap = {
   a: Phaser.Input.Keyboard.Key;
   d: Phaser.Input.Keyboard.Key;
   w: Phaser.Input.Keyboard.Key;
+  space: Phaser.Input.Keyboard.Key;
   s: Phaser.Input.Keyboard.Key;
   e: Phaser.Input.Keyboard.Key;
   q: Phaser.Input.Keyboard.Key;
@@ -275,6 +276,7 @@ export class GameScene extends Phaser.Scene {
       a: Phaser.Input.Keyboard.KeyCodes.A,
       d: Phaser.Input.Keyboard.KeyCodes.D,
       w: Phaser.Input.Keyboard.KeyCodes.W,
+      space: Phaser.Input.Keyboard.KeyCodes.SPACE,
       s: Phaser.Input.Keyboard.KeyCodes.S,
       e: Phaser.Input.Keyboard.KeyCodes.E,
       q: Phaser.Input.Keyboard.KeyCodes.Q,
@@ -1895,7 +1897,8 @@ export class GameScene extends Phaser.Scene {
     const right = this.cursors.right.isDown || this.keys.d.isDown;
     const jumpPressed =
       Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
-      Phaser.Input.Keyboard.JustDown(this.keys.w);
+      Phaser.Input.Keyboard.JustDown(this.keys.w) ||
+      Phaser.Input.Keyboard.JustDown(this.keys.space);
     const dropPressed =
       Phaser.Input.Keyboard.JustDown(this.cursors.down) ||
       Phaser.Input.Keyboard.JustDown(this.keys.s);
