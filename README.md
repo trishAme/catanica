@@ -24,7 +24,7 @@ The current version includes:
 
 ## Play Online
 
-[Play Catanica / Котаника](http://catanica-8e5033.pages.git.ringcentral.com/)
+[Play Catanica / Котаника](https://trishame.github.io/catanica/)
 
 ## Game Description
 
