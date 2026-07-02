@@ -18,7 +18,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Mixed young cereal grasses",
     category: "edible",
     sniffDescription:
-      "Низкий лоток с мягкими зелёными ростками, почти маленькая комнатная лужайка.",
+      "Плотный низкий коврик из мягких злаковых ростков: много тонких травинок, без крупных листьев и цветов.",
     resultFact:
       "Это подходящая кошачья травка: котик мурчит и становится ближе ко сну.",
     visualTags: ["grass", "short-blades"],
@@ -30,7 +30,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Avena sativa",
     category: "edible",
     sniffDescription:
-      "Тонкие прямые ростки в плотном пучке, похожие на маленький горшочек травы для питомцев.",
+      "Тонкие прямые травинки растут плотным пучком; кончики узкие, стебли выглядят как свежая мини-грядка овса.",
     resultFact:
       "Овёс часто выращивают как кошачью траву. В игре он приносит довольное мурчание.",
     visualTags: ["grass", "thin-blades"],
@@ -42,7 +42,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Triticum aestivum",
     category: "edible",
     sniffDescription:
-      "Плотные узкие зелёные листочки в невысоком горшке, как мини-луг на подоконнике.",
+      "Пучок узких плоских листьев в невысоком горшке; выглядит гуще и ровнее, чем овёс, как маленький газон.",
     resultFact:
       "Пшеницу часто выращивают для кошачьего перекуса, так что котик доволен.",
     visualTags: ["grass", "dense-blades"],
@@ -54,7 +54,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Hordeum vulgare",
     category: "edible",
     sniffDescription:
-      "Свежие зелёные ростки выглядят чуть более растрёпанно, чем аккуратная кошачья травка.",
+      "Зелёные злаковые ростки с чуть растрёпанными, разной длины травинками; пучок выглядит менее ровным.",
     resultFact:
       "Ячмень тоже выращивают как кошачью траву. Подношение принято с мурчанием.",
     visualTags: ["grass", "wild-blades"],
@@ -66,7 +66,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Chlorophytum comosum",
     category: "neutral",
     sniffDescription:
-      "Длинные полосатые листья дугами свисают из горшка, иногда с маленькими детками на усах.",
+      "Длинные дугообразные листья с белой или светлой полосой; часто выпускает тонкие усы с маленькими розетками-детками.",
     resultFact:
       "С котиком всё хорошо, но это не кошачий перекус. Некоторые растения лучше просто рассматривать.",
     visualTags: ["arching-leaves", "striped"],
@@ -78,7 +78,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Nephrolepis exaltata",
     category: "neutral",
     sniffDescription:
-      "Пышная шапка из множества мелких листочков, как мягкий зелёный фонтан.",
+      "Пышный папоротник: длинные перистые вайи расходятся фонтаном, каждая веточка покрыта множеством мелких листочков.",
     resultFact:
       "Котик в порядке, но папоротник не добавляет мурчаний перед сном.",
     visualTags: ["fern", "many-leaflets"],
@@ -90,7 +90,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Phalaenopsis sp.",
     category: "neutral",
     sniffDescription:
-      "Аккуратные широкие листья и высокий стебель с цветами, похожими на бабочек.",
+      "У основания несколько толстых овальных листьев; над ними длинный цветонос с плоскими цветами-бабочками.",
     resultFact:
       "Котик в порядке, но для миссии мурчаний этот цветок бесполезен.",
     visualTags: ["flower", "broad-leaves"],
@@ -102,7 +102,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Ficus benjamina",
     category: "dangerous",
     sniffDescription:
-      "Комнатное деревце с тонкими ветками и множеством овальных глянцевых листьев.",
+      "Небольшое комнатное деревце: тонкие поникающие ветви, много гладких овальных листьев с заострённым кончиком.",
     resultFact:
       "Фикус Бенджамина считается токсичным для кошек. Лучше убрать его с кошачьего маршрута.",
     visualTags: ["tree", "glossy-leaves"],
@@ -114,7 +114,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Rosa spp.",
     category: "neutral",
     sniffDescription:
-      "Классический цветок с круглым бутоном и плотными лепестками на зелёном стебле.",
+      "Слоистый бутон или раскрытый цветок на жёстком стебле; листья обычно зубчатые, на стеблях могут быть шипы.",
     resultFact:
       "Сама роза не кошачье лакомство. В реальности отдельно опасны шипы и химия на букетах.",
     visualTags: ["flower", "round-bloom"],
@@ -126,7 +126,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Salvia rosmarinus",
     category: "neutral",
     sniffDescription:
-      "Ароматные тонкие игольчатые листочки торчат вверх плотным зелёным кустиком.",
+      "Древесный пряный кустик с множеством узких игольчатых листьев; веточки плотные и часто пахнут смолисто.",
     resultFact:
       "Розмарин не считается токсичным для кошек, но это всё равно не кошачья трава для награды.",
     visualTags: ["herb", "needle-leaves"],
@@ -138,7 +138,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Helianthus annuus",
     category: "neutral",
     sniffDescription:
-      "Яркий жёлтый цветок с тёмной серединкой, как маленькое солнце в горшке.",
+      "Крупная жёлтая корзинка с тёмной серединой на жёстком стебле; листья широкие, слегка шершавые.",
     resultFact:
       "Подсолнух не даёт кошачьей награды. Красиво, но котику полезнее трава.",
     visualTags: ["flower", "yellow-bloom"],
@@ -150,7 +150,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Lavandula spp.",
     category: "dangerous",
     sniffDescription:
-      "Узкие серо-зелёные листики и фиолетовые колоски с сильным ароматом.",
+      "Серо-зелёные узкие листья и фиолетовые колоски на тонких стеблях; кустик заметно пахнет даже рядом.",
     resultFact:
       "Лаванда токсична для кошек. В игре правильнее сбросить горшок, чем пробовать на вкус.",
     visualTags: ["herb", "purple-spikes"],
@@ -162,7 +162,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Lilium / Hemerocallis",
     category: "dangerous",
     sniffDescription:
-      "Крупные заметные цветы из букетов, с длинными лепестками и видимой пыльцой.",
+      "Крупные лилейные цветы-звёзды или трубки: шесть длинных лепестков, заметные тычинки и пыльца.",
     resultFact:
       "Лилии опасны для кошек. В реальной жизни их лучше держать подальше от котиков.",
     visualTags: ["flower", "bouquet", "long-petals"],
@@ -174,7 +174,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Aloe vera",
     category: "dangerous",
     sniffDescription:
-      "Колючий суккулент с толстыми мясистыми листьями и светлыми пятнышками.",
+      "Розетка из толстых мясистых листьев-копий; края часто зубчатые, на листьях бывают светлые пятна.",
     resultFact:
       "Алоэ считается опасным для кошек. Правильное кошачье решение — драматично сбросить горшок.",
     visualTags: ["succulent", "spiky"],
@@ -186,7 +186,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Epipremnum aureum",
     category: "dangerous",
     sniffDescription:
-      "Свисающие сердцевидные листья, которые красиво ползут с полки или из горшка.",
+      "Вьющаяся лиана со свисающими стеблями; листья сердцевидные, часто с жёлтыми или светлыми пятнами.",
     resultFact:
       "Сциндапсус опасен для кошек: хорош как декор на полке, ужасен как кошачий салат.",
     visualTags: ["trailing", "heart-leaves"],
@@ -198,7 +198,7 @@ export const PLANTS: Plant[] = [
     scientificName: "Sansevieria trifasciata",
     category: "dangerous",
     sniffDescription:
-      "Высокие жёсткие листья-стрелы торчат вверх и часто покрыты светлыми полосами.",
+      "Жёсткие вертикальные листья-мечи растут прямо из земли; часто есть поперечные полосы и жёлтая кайма.",
     resultFact:
       "Сансевиерия, она же щучий хвост, опасна для кошек. Горшок вниз, котик горд собой.",
     visualTags: ["upright-leaves", "striped"],

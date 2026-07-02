@@ -183,6 +183,7 @@ export class GameScene extends Phaser.Scene {
   private nextButton?: Phaser.GameObjects.Text;
   private mainMenuConfirmObjects: Phaser.GameObjects.GameObject[] = [];
   private journalOpen = false;
+  private journalPage = 0;
   private journalObjects: Phaser.GameObjects.GameObject[] = [];
   private savePanelOpen = false;
   private savePanelObjects: Phaser.GameObjects.GameObject[] = [];
@@ -249,6 +250,7 @@ export class GameScene extends Phaser.Scene {
     this.jumpStretchUntil = 0;
     this.catScaleMultiplier = 1;
     this.journalOpen = false;
+    this.journalPage = 0;
     this.journalObjects = [];
     this.garlandLights = [];
     this.roomLamps = [];
@@ -2222,15 +2224,39 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleJournalInput(): void {
-    if (!Phaser.Input.Keyboard.JustDown(this.keys.j)) {
+    if (this.journalOpen) {
+      if (Phaser.Input.Keyboard.JustDown(this.keys.j)) {
+        this.closePlantJournal();
+        return;
+      }
+
+      if (Phaser.Input.Keyboard.JustDown(this.keys.a)) {
+        this.changePlantJournalPage(-1);
+        return;
+      }
+
+      if (Phaser.Input.Keyboard.JustDown(this.keys.d)) {
+        this.changePlantJournalPage(1);
+      }
       return;
     }
 
-    if (this.journalOpen) {
-      this.closePlantJournal();
-    } else {
+    if (Phaser.Input.Keyboard.JustDown(this.keys.j)) {
+      this.journalPage = 0;
       this.showPlantJournal();
     }
+  }
+
+  private changePlantJournalPage(delta: number): void {
+    const pageCount = Math.max(1, Math.ceil(getDiscoveredPlantIds().length / 6));
+    const nextPage = Phaser.Math.Clamp(this.journalPage + delta, 0, pageCount - 1);
+
+    if (nextPage === this.journalPage) {
+      return;
+    }
+
+    this.journalPage = nextPage;
+    this.showPlantJournal();
   }
 
   private showPlantJournal(): void {
@@ -2240,12 +2266,19 @@ export class GameScene extends Phaser.Scene {
 
     const discovered = new Set(getDiscoveredPlantIds());
     const plants = PLANTS.filter((plant) => discovered.has(plant.id));
+    const plantsPerPage = 6;
+    const pageCount = Math.max(1, Math.ceil(plants.length / plantsPerPage));
+    this.journalPage = Phaser.Math.Clamp(this.journalPage, 0, pageCount - 1);
+    const pagePlants = plants.slice(
+      this.journalPage * plantsPerPage,
+      this.journalPage * plantsPerPage + plantsPerPage
+    );
     const panel = this.add
-      .rectangle(WORLD_WIDTH / 2, 222, 650, 308, 0x24192d, 0.95)
+      .rectangle(WORLD_WIDTH / 2, 224, 700, 336, 0x24192d, 0.95)
       .setStrokeStyle(2, 0x8a5c80, 0.95)
       .setDepth(40);
     const title = this.add
-      .text(WORLD_WIDTH / 2, 88, "Кошачий гербарий", {
+      .text(WORLD_WIDTH / 2, 74, "Кошачий гербарий", {
         fontFamily: "monospace",
         fontSize: "14px",
         color: "#f4c95d",
@@ -2253,16 +2286,25 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setDepth(41);
+    const hintText = pageCount > 1 ? "A/D — листать | J — закрыть" : "J — закрыть";
     const hint = this.add
-      .text(WORLD_WIDTH / 2, 110, "J — закрыть", {
+      .text(WORLD_WIDTH / 2, 96, hintText, {
         fontFamily: "monospace",
         fontSize: "9px",
         color: "#cfc2d8"
       })
       .setOrigin(0.5)
       .setDepth(41);
+    const pageLabel = this.add
+      .text(WORLD_WIDTH / 2, 108, "Страница " + (this.journalPage + 1) + "/" + pageCount, {
+        fontFamily: "monospace",
+        fontSize: "8px",
+        color: "#8fb9d4"
+      })
+      .setOrigin(0.5)
+      .setDepth(41);
 
-    this.journalObjects.push(panel, title, hint);
+    this.journalObjects.push(panel, title, hint, pageLabel);
 
     if (plants.length === 0) {
       this.journalObjects.push(
@@ -2280,34 +2322,40 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    plants.slice(0, 12).forEach((plant, index) => {
+    pagePlants.forEach((plant, index) => {
       const column = index % 2;
       const row = Math.floor(index / 2);
-      const x = 90 + column * 318;
-      const y = 138 + row * 44;
-      const icon = this.add.sprite(x, y + 28, "plant-" + plant.id)
+      const x = 78 + column * 340;
+      const y = 126 + row * 88;
+      const icon = this.add.sprite(x, y + 62, "plant-" + plant.id)
         .setOrigin(0.5, 1)
-        .setScale(0.35)
+        .setScale(0.34)
         .setDepth(41);
-      const name = this.add.text(x + 34, y, plant.commonName, {
+      const name = this.add.text(x + 36, y, plant.commonName, {
         fontFamily: "monospace",
         fontSize: "10px",
         color: "#f9e8c8",
         fontStyle: "bold"
       }).setDepth(41);
-      const threat = this.add.text(x + 34, y + 13, getThreatLabel(plant), {
+      const scientific = this.add.text(x + 36, y + 12, plant.scientificName ?? "", {
         fontFamily: "monospace",
-        fontSize: "9px",
-        color: getThreatColor(plant)
+        fontSize: "7px",
+        color: "#8fb9d4",
+        wordWrap: { width: 250 }
       }).setDepth(41);
-      const fact = this.add.text(x + 34, y + 25, plant.sniffDescription, {
+      const threat = this.add.text(x + 36, y + 23, getThreatLabel(plant), {
         fontFamily: "monospace",
         fontSize: "8px",
-        color: "#cfc2d8",
-        wordWrap: { width: 220 }
+        color: getThreatColor(plant)
+      }).setDepth(41);
+      const fact = this.add.text(x + 36, y + 34, plant.sniffDescription, {
+        fontFamily: "monospace",
+        fontSize: "8px",
+        color: "#ded3e6",
+        wordWrap: { width: 252, useAdvancedWrap: true }
       }).setDepth(41);
 
-      this.journalObjects.push(icon, name, threat, fact);
+      this.journalObjects.push(icon, name, scientific, threat, fact);
     });
   }
 
